@@ -1,3 +1,11 @@
+
+#░██████╗███████╗░██████╗░██████╗██╗░█████╗░███╗░░██╗  ██████╗░
+#██╔════╝██╔════╝██╔════╝██╔════╝██║██╔══██╗████╗░██║  ╚════██╗
+#╚█████╗░█████╗░░╚█████╗░╚█████╗░██║██║░░██║██╔██╗██║  ░░███╔═╝
+#░╚═══██╗██╔══╝░░░╚═══██╗░╚═══██╗██║██║░░██║██║╚████║  ██╔══╝░░
+#██████╔╝███████╗██████╔╝██████╔╝██║╚█████╔╝██║░╚███║  ███████╗
+#╚═════╝░╚══════╝╚═════╝░╚═════╝░╚═╝░╚════╝░╚═╝░░╚══╝  ╚══════╝
+
 x=c(1,2,3,4,5)
 y=c(1,2,4,6,30)
 y2=c(2,3,5,7,25)
@@ -61,7 +69,7 @@ mpg
 #Save the dataset as an xls file
 install.packages("writexl")   # only once
 library(writexl)              # every new session
-write_xlsx(mpg, "xls/mpg_data.xlsx")
+write_xlsx(mpg, "data/mpg_data.xlsx")
 
 # three key components of every plot: data, aesthetics and geoms
 # Data; Aesthetic mapping; Geom function {geom_point(), geom_histogram(), geom_line()}
@@ -130,7 +138,3 @@ ggplot(mpg, aes(displ, colour=drv)) + geom_freqpoly(binwidth=1)
 
 ggplot(mpg, aes(displ, fill = drv)) + geom_histogram(binwidth = 0.5) +
   facet_wrap(~fl, ncol = 1)
-
-ggplot(mpg, aes(displ, hwy)) + geom_point() + geom_smooth()
-ggplot(mpg, aes(displ, hwy)) + geom_point() + geom_smooth(method = "lm")
-
