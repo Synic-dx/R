@@ -37,7 +37,10 @@ file_url_11 <- "https://docs.google.com/spreadsheets/d/1_CSUeJfZ_bmE6xdDu5vUFuQR
 newDF_22 <- read_sheet(file_url_11, sheet = "Sheet1")
 newDF_22
 
-# Same for SalesData
+# This is for files with restricted access, like our timetable
 gs4_auth()
-gs4_auth(email = "i25ShinjanG@iimidr.ac.in")
+#gs4_auth(email = "i25ShinjanG@iimidr.ac.in")
 
+timeTable <- read_sheet('16nszeC-D9AkZEdTkLmWsEtLXHJK3SP2EDkwREOsSVTw', sheet = "Time Table Term II ") 
+#Use sheet_names('URL') to list out sheets in case of sheet not found error (typos)
+timeTable
