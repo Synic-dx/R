@@ -71,18 +71,3 @@ write.csv(mpg, file = "output_file.csv", row.names = FALSE)
 read_csv("data123.csv", col_names = c("student_id", "full_name", "favourite_food", "meal_plan", "age"), skip = 1, show_col_types = FALSE)
 
 write_csv(mpg, file = "output_file_2.csv")
-
-
-# clipboard data
-x1 <- readClipboard()
-
-my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
-my_data
-
-
-# de-limiters
-
-# read_csv(): For comma-separated values (,)
-# read_tsv(): For tab-separated values (\t)
-# read_csv2(): For semicolon-separated values (;)
-my_dat1 <- read_delim("data_dat.txt", delim = "|", show_col_types = FALSE)
