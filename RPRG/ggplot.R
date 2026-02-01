@@ -122,6 +122,7 @@ p <- ggplot(df, aes(x,y, label = label)) +
   labs(x = NULL, y= NULL) +
   theme(plot.title = element_text(size = 12))
   
+#1,2,4,2,4,5,1,3,4
   p + geom_point() + ggtitle("point")
   p + geom_text() + ggtitle("text")
   p + geom_bar(stat= "identity") + ggtitle("bar")

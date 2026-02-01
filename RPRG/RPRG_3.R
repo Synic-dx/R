@@ -22,9 +22,9 @@ g1 #adds a linear regression line
 # - "gam"   : generalized additive model (needs mgcv::gam)
 # - "rlm"   : robust linear model (MASS::rlm)
 
-p1 <- ggplot(mpg, aes(displ, hwy)) + geom_point() + geom_smooth(method = "lm")
+p1 <- ggplot(mpg, aes(displ, hwy)) + geom_point() + geom_smooth(method = "loess")
 p1
-p1 <- p1 + coord_cartesian(xlim = c(0, 10), ylim = c(0, 50))
+p1 <- p1 + coord_cartesian(xlim = c(0, 5), ylim = c(0, 30))
 p1
 p1 <-  p1 + xlim(0, 5) + ylim(0, 30)
 p1
@@ -64,7 +64,7 @@ write_xlsx(newDF, "RPRG/data/new_file.xlsx")
 
 # import and export csv data
 newData <- read.csv("data123.csv", na = c("N/A", ""))
-write.csv(mpg, file = "output_file.csv", row.names = FALSE)
+write.csv(mpg, file = "output_file.csv", row.names = FALSE) #row.names False stands for not including row names
 
 # install.packages("tidyverse")
 # library(tidyverse)

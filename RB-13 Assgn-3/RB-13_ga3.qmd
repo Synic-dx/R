@@ -1,0 +1,67 @@
+---
+title: "Sales Data Analysis"
+format: beamer
+editor: visual
+echo: false
+---
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+
+SalesData <- read_excel("SalesData.xlsx")
+```
+
+## Introduction
+
+-   This presentation analyzes the *SalesData* dataset.
+-   The dataset contains sales information across:
+    -   Multiple **years**
+    -   Different **cities**
+    -   Various **product categories**
+-   The objective is to identify:
+    -   Year-wise sales trends
+    -   City-wise performance patterns
+
+## Year-wise Sales
+
+```{r, fig.height=2,fig.width=6}
+year_sales <- tapply(SalesData$Sales, SalesData$Year, sum)
+yearwise_sales <- data.frame(
+  Year = names(year_sales),
+  Total_Sales = as.numeric(year_sales)
+)
+knitr::kable(yearwise_sales)
+yearwise_sales$Year <- as.numeric(yearwise_sales$Year)
+
+ggplot(yearwise_sales, aes(Year, Total_Sales)) +
+  geom_line()
+```
+
+Sales show a steady year-on-year increase from 2021 to 2025, indicating consistent business growth and stable performance.
+
+## City-wise Sales Comparison
+
+```{r,fig.height=4}
+city_sales <- tapply(SalesData$Sales, SalesData$City, sum)
+
+city_sales_df <- data.frame(
+  City = names(city_sales),
+  Total_Sales = as.numeric(city_sales)
+)
+
+ggplot(city_sales_df, aes(City, Total_Sales, fill = City)) +
+  geom_col()
+```
+
+Sales vary significantly across cities, with Delhi and Mumbai leading in total sales, while Ahmedabad and Kolkata show lower contributions.
+
+## Operating Profit Across Product Categories
+
+```{r,fig.height=4}
+ggplot(SalesData, aes(Category, Operating_Profit, fill = Category)) +
+  geom_boxplot()
+```
+
+Product-wise profit analysis shows that Personal Care and Home Care are the most profitable categories, indicating stronger margins and operational efficiency.

@@ -6,6 +6,7 @@
 #        \/     \/     \/     \/               \/       |__| 
 
 # clipboard data
+library(tidyverse)
 x1 <- readClipboard()
 
 my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)

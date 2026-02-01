@@ -1,0 +1,200 @@
+---
+title: "Stock Analysis Report"
+author: "RB-13"
+format:
+  pdf:
+    geometry: margin=0.72in
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 7, fig.height = 2.2)
+
+#| echo: false #dont show code
+#| message: false #dont show random consolve mssgs
+#| warning: false  #dont show console warnings
+
+options(warn = -1) #It's still showing for some reason so did this
+library(ggplot2)
+library(readr)
+library(tidyverse)
+library(knitr)
+library(lubridate)
+
+co_code_input <- "18102"
+
+stocks <- read_delim("stocks25.txt", delim = "|", show_col_types = FALSE) #show_col_types = FALSE to suppress column type messages such as "X columns were parsed as ..."
+colnames(stocks) <- c("co_code", "company_name", "date", "price") #Renaming columns for easier reference
+
+stocks$date <- dmy(stocks$date) #Converting date column to Date type
+stocks$price <- as.numeric(stocks$price) #Converting price column to numeric type
+
+stock_data <- stocks %>% #same as pipes, pipes on my end aren't working for some reason
+  filter(co_code == co_code_input) %>% 
+  arrange(date) %>%
+  mutate(
+    daily_ret = (price/lag(price) - 1) * 100,# Daily return calculation, lag function to get previous day's price, part of dplyr
+    year = year(date), #taking the year out of the date
+    month = format(date, "%Y-%m"), #taking month out of the date
+    day_of_year = as.numeric(date - min(date)) #calculating days since start date
+  )
+
+company_name <- stock_data$company_name[1] #getting company name for title, [1] to get first value, not required but good practice
+```
+
+# `r company_name`
+
+**Code**: `r co_code_input` \| **Period**: `r min(stock_data$date)` to `r max(stock_data$date)`
+
+## Summary
+
+This report analyses the stock price behaviour of **`r company_name`** over the given period using daily price data.
+
+During this time, the stock price ranged from  
+₹**`r round(min(stock_data$price), 2)`** to ₹**`r round(max(stock_data$price), 2)`**,  
+with an average price of ₹**`r round(mean(stock_data$price), 2)`**.
+
+The stock started the period at ₹**`r round(first(stock_data$price), 2)`** and ended at  
+₹**`r round(last(stock_data$price), 2)`**, resulting in an overall return of  
+**`r round((last(stock_data$price)/first(stock_data$price) - 1) * 100, 2)`%**.
+
+The sections below present visualisations of price trends, monthly averages, returns, daily fluctuations, and yearly price distributions to better understand the stock’s behaviour over time.
+
+------------------------------------------------------------------------
+
+## 1. Price Trend Line
+### This shows the stock price movement over the entire period.
+
+```{r}
+#| echo: false
+
+ggplot(stock_data, aes(x = date, y = price)) +
+  geom_line(color = "blue", linewidth = 0.5) + #blue line
+  labs(title = "Stock Price Over Time", 
+       x = "Date", y = "Price (INR)") +
+  theme_minimal() + #removes the shaded grid to make it look good
+  theme(axis.text = element_text(size = 9),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10),
+        plot.margin = margin(0.1, 0.1, 0.2, 0.1, "in")) #customizing text sizes and margins
+```
+
+**Observation**
+
+The stock price increased from ₹**`r round(first(stock_data$price), 2)`** at the beginning of the period to  
+₹**`r round(last(stock_data$price), 2)`** at the end.
+
+The highest observed price during the period was ₹**`r round(max(stock_data$price), 2)`**,  
+while the lowest price recorded was ₹**`r round(min(stock_data$price), 2)`**.
+
+------------------------------------------------------------------------
+
+## 2. Monthly Returns (Green/Red)
+### This shows the percentage return for each month, green for positive returns and red for negative.
+
+```{r}
+#| echo: false
+
+monthly_ret <- stock_data %>%
+  group_by(month) %>%
+  summarise(
+    open = first(price),
+    close = last(price),
+    ret = (close/open - 1) * 100, #((last value / fist value)-1)*100 to get return percentage
+    .groups = "drop" #to avoid grouped output
+  ) %>%
+  mutate(idx = row_number())
+
+n_months_ret <- nrow(monthly_ret)
+break_positions_ret <- c(1, round(n_months_ret/2), n_months_ret)
+break_labels_ret <- monthly_ret$month[break_positions_ret] #again setting x-markers
+
+ggplot(monthly_ret, aes(x = idx, y = ret, fill = ret > 0)) + #if return is positive, green, else red
+  geom_bar(stat="identity") + #bar chart
+  scale_fill_manual(values = c("red", "green"), guide = "none") + #fill = ret > 0, red for false, green for true, its always false then true, guide = "none" to remove legend
+  scale_x_continuous(breaks = break_positions_ret, labels = break_labels_ret) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.3) + #x-axis line
+  labs(title = "Monthly Returns",
+       x = "Month", y = "Return (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 10, hjust = 0.5),
+        axis.text.y = element_text(size = 9),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10),
+        plot.margin = margin(0.1, 0.1, 0.3, 0.1, "in"))
+```
+
+**Observation**
+
+Out of **`r nrow(monthly_ret)`** months analysed,  
+**`r sum(monthly_ret$ret > 0)`** months recorded positive returns, while  
+**`r sum(monthly_ret$ret <= 0)`** months recorded negative or zero returns.
+
+The highest monthly return observed was **`r round(max(monthly_ret$ret), 2)`%**,  
+and the lowest monthly return was **`r round(min(monthly_ret$ret), 2)`%**.
+
+------------------------------------------------------------------------
+
+## 3. Extreme Days Scatter
+### This scatter plot shows daily returns, with positive returns in green and negative returns in red.
+
+```{r}
+#| echo: false
+
+ggplot(stock_data, aes(x = date, y = daily_ret, color = daily_ret > 0)) +
+  geom_point(size = 0.5, alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  scale_color_manual(values = c("red", "green"), guide = "none") +
+  labs(title = "Daily Returns Scatter",
+       x = "Date", y = "Return (%)") +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 9),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10),
+        plot.margin = margin(0.1, 0.1, 0.2, 0.1, "in"))
+```
+
+**Observation**
+
+The standard deviation of daily returns over the period is  
+**`r round(sd(stock_data$daily_ret, na.rm = TRUE), 2)`%**, indicating the level of daily price fluctuation.
+
+Out of **`r sum(!is.na(stock_data$daily_ret))`** trading days,  
+**`r sum(stock_data$daily_ret > 0, na.rm = TRUE)`** days had positive returns and  
+**`r sum(stock_data$daily_ret <= 0, na.rm = TRUE)`** days had negative or zero returns.
+
+------------------------------------------------------------------------
+
+## 4. Price Distribution by Year
+### This boxplot shows the distribution of stock prices for each year.
+
+```{r}
+#| echo: false
+
+ggplot(stock_data, aes(x = factor(year), y = price)) + #factor(year) to treat year as categorical variable
+  geom_boxplot(fill = "lightblue", outlier.size = 0.5) +
+  labs(title = "Price Distribution by Year",
+       x = "Year", y = "Price (INR)") +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 9),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10),
+        plot.margin = margin(0.1, 0.1, 0.2, 0.1, "in"))
+```
+**Observation**
+
+In the first year of analysis (**`r min(stock_data$year)`**), the standard deviation of prices was  
+₹**`r round(sd(stock_data$price[stock_data$year == min(stock_data$year)]), 2)`**.
+
+In the last year (**`r max(stock_data$year)`**), the standard deviation was  
+₹**`r round(sd(stock_data$price[stock_data$year == max(stock_data$year)]), 2)`**.
+
+This reflects a change in price dispersion between the beginning and end of the period.
+
+------------------------------------------------------------------------
+
+**RB-13**  
+Shinjan Garain  
+Harsh Bansal  
+Shreyash Upadhyay  
+Shashwat Kumar  

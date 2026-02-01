@@ -45,7 +45,7 @@ lines(x, y2,
 p1 <- c(10,20,30,40)
 myLabels <- c('A','B','C','D')
 myColors <- c('blue','green','red','yellow')
-pie(p1, init.angle = 90, label = myLabels, main='Main Title',
+pie(p1, init.angle = 0, label = myLabels, main='Main Title',
 # init.angle rotates the start of the pie chart, positive means anti-clockwise
     col=myColors)
 legend("bottomright", myLabels, fill = myColors)
@@ -74,7 +74,7 @@ write_xlsx(mpg, "data/mpg_data.xlsx")
 # three key components of every plot: data, aesthetics and geoms
 # Data; Aesthetic mapping; Geom function {geom_point(), geom_histogram(), geom_line()}
 ggplot(mpg, aes(x = displ, y = hwy)) + geom_point()
-ggplot(mpg, aes(cty, hwy)) + geom_point()
+ggplot(mpg, aes(cty, hwy)) + geom_jitter()
 
 ggplot(mpg, aes(cty)) + geom_histogram()
 ggplot(mpg, aes(cty)) + geom_histogram(binwidth = 0.5) #binwidth: width of each bar
@@ -108,8 +108,7 @@ ggplot(mpg, aes(drv, hwy)) + geom_violin() #more precise than boxplot, shows den
 p <- ggplot(mpg, aes(cty, hwy)) + geom_point() + xlab("city (mpg)") + ylab("highway (mpg)")
 ggsave("plot1.png", p, width = 5, height = 5)
 
-pdf("plot1.pdf", width = 4, height = 6)
-ggplot(mpg, aes(cty, hwy)) + geom_point() + xlab("city (mpg)") + ylab("highway (mpg)")
+pdf("plot1.pdf", width = 4, height = 6)ggplot(mpg, aes(cty, hwy)) + geom_point() + xlab("city (mpg)") + ylab("highway (mpg)")
 dev.off()
 
 ggplot(mpg, aes(displ, cty)) + geom_point()
@@ -132,9 +131,8 @@ ggplot(mpg, aes(displ, hwy, shape=drv)) + geom_point(colour='blue', size=2)
 ggplot(mpg, aes(displ)) + geom_histogram()
 ggplot(mpg, aes(displ)) + geom_freqpoly()
 ggplot(mpg, aes(displ, fill=drv)) + geom_histogram()
-ggplot(mpg, aes(displ, colour=drv)) + geom_freqpoly(binwidth=1)
-
-+facet_wrap(~fl, ncol = 1)
+ggplot(mpg, aes(displ, colour=drv)) + geom_freqpoly(binwidth=1) +
+  facet_wrap(~fl, ncol = 1)
 
 ggplot(mpg, aes(displ, fill = drv)) + geom_histogram(binwidth = 0.5) +
   facet_wrap(~fl, ncol = 1)
